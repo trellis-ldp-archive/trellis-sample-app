@@ -1,0 +1,155 @@
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'distribution'
+apply plugin: 'application'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group = 'com.example'
+description = 'Trellis Application'
+mainClassName = 'com.example.trellis.app.TrellisApplication'
+
+ext {
+    moduleName = "com.exampe.trellis.app"
+    vendor = 'Trellis LDP'
+    homepage = 'http://www.trellisldp.org'
+    docURL = 'http://www.trellisldp.org/apidocs'
+    license = 'Apache 2'
+
+    /* Dependencies */
+    trellisVersion = '0.5.0-SNAPSHOT'
+
+    commonsRdfVersion = '0.3.0-incubating'
+    commonsCodecVersion = '1.11'
+    httpClientVersion = '4.5.2'
+    slf4jVersion = '1.7.25'
+    dropwizardVersion = '1.2.0'
+    activationApiVersion = '1.2.0'
+    jwtVersion = '0.9.0'
+    jaxbVersion = '2.3.0'
+
+    /* Testing */
+    apiguardianVersion = '1.0.0'
+    junitVersion = '5.0.2'
+    junitPlatformVersion = '1.0.2'
+    curatorVersion = '4.0.0'
+    mockitoVersion = '2.12.0'
+}
+
+
+configurations {
+    buildToolsConfig
+}
+
+dependencies {
+    compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
+    compile group: 'javax.activation', name: 'javax.activation-api', version: activationApiVersion
+    compile group: 'io.dropwizard', name: 'dropwizard-auth', version: dropwizardVersion
+    compile group: 'io.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: jwtVersion
+    compile group: 'org.apache.commons', name: 'commons-rdf-jena', version: commonsRdfVersion
+    compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
+    compile group: 'org.trellisldp', name: 'trellis-agent', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-api', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-audit', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-binary', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-constraint-rules', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-event-serialization', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-http', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-id', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-io-jena', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-namespaces', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-vocabulary', version: trellisVersion
+    compile group: 'org.trellisldp', name: 'trellis-webac', version: trellisVersion
+
+    runtime group: 'javax.xml.bind', name: 'jaxb-api', version: jaxbVersion
+
+    testCompile group: 'org.apiguardian', name: 'apiguardian-api', version: apiguardianVersion
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation group: 'org.apache.curator', name: 'curator-test', version: curatorVersion
+
+    buildToolsConfig 'org.trellisldp:trellis-build-tools:0.2.0'
+}
+
+distributions {
+    main {
+        contents {
+            from { 'src/dist' }
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+	maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
+task sourceJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier 'javadoc'
+    from javadoc
+}
+
+artifacts {
+    archives javadocJar
+    archives sourceJar
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.7.9"
+}
+
+task copyDistTask(type: Copy) {
+    from 'LICENSE'
+    into 'src/dist'
+}
+
+task processBuildTools(type: Copy) {
+    from {
+        configurations.buildToolsConfig.collect {
+            zipTree(it).matching {
+                include 'checkstyle/*.xml'
+                include 'license/*.txt'
+            }
+        }
+    }
+    into 'build'
+}
+
+checkstyle {
+    configFile = rootProject.file('build/checkstyle/checkstyle.xml')
+    configProperties.checkstyleConfigDir = rootProject.file('build/checkstyle/')
+    toolVersion = "8.1"
+}
+
+checkstyleMain.dependsOn processBuildTools
+assembleDist.dependsOn copyDistTask
