@@ -1,0 +1,36 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  requestLog:
+    appenders:
+      - type: file
+        currentLogFilename: /var/lib/trellis/log/access.log
+        archive: true
+        archivedLogFilenamePattern: /var/lib/trellis/log/access-%i.log
+        archivedFileCount: 5
+        maxFileSize: 100K
+
+logging:
+  level: WARN
+  appenders:
+    - type: file
+      currentLogFilename: /var/lib/trellis/log/trellis.log
+      archive: true
+      archivedLogFilenamePattern: /var/lib/trellis/log/trellis-%i.log
+      archivedFileCount: 5
+      maxFileSize: 100K
+  loggers:
+    org.trellisldp: INFO
+    io.dropwizard: INFO
+
+binaryPath: /var/lib/trellis/binaries
+
+baseUrl: http://localhost:8080/
+
+namespacesPath: /opt/trellis/etc/namespaces.json
+
+jwtKey: secret
+
+basicAuthPath: /opt/trellis/etc/users.auth
+

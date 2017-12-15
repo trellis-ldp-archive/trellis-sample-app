@@ -1,0 +1,21 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+
+logging:
+  level: WARN
+  loggers:
+    com.example.trellis: INFO
+    io.dropwizard: INFO
+
+binaryPath: /tmp/trellisData/binaries
+
+baseUrl: http://localhost:8080/
+
+namespacesPath: /tmp/trellisData/namespaces.json
+
+jwtKey: secret
+
+basicAuthPath: users.auth
+
