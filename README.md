@@ -1,8 +1,16 @@
 # Sample Trellis Application
 
+[![Build Status](https://travis-ci.org/trellis-ldp/trellis-sample-app.png?branch=master)](https://travis-ci.org/trellis-ldp/trellis-sample-app)
+
 This project provides a skeleton for a custom Trellis application. For a full, working
 example, please examine the trellis-rosid-app directory in
 [trellis-ldp/trellis-rosid](https://github.com/trellis-ldp/trellis-rosid).
+
+You will need to add a persistence layer to make this code work. To do that, add your
+code to the `TrellisApplication` class inside the `run` method. It will be obvious.
+
+From there, you may wish to make further modifications to that method or to the
+`TrellisConfiguration` class.
 
 ## Running Trellis
 
