@@ -4,6 +4,6 @@ dist: trusty
 group: edge
 
 jdk:
-  -oraclejdk8
-  -oraclejdk9
+  - oraclejdk8
+  - oraclejdk9
 
